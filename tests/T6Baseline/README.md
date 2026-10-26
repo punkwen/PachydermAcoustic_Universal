@@ -48,8 +48,8 @@ T6_BEFORE_FIXTURE=<path-to-before>/t6-fixture.txt dotnet run --project tests/Ana
 
 ## Expected verdict (measured 2026-10-27, 28 workers)
 
-- Energy / Pressure / directions / source power / band table / sub-ray counts:
-  identical within tolerance (P diffs ≤ 2 ulp from FFT summation order; E ≤ 1 ulp).
+- directions, source power, band table, sub-ray counts: **bitwise identical**;
+  Energy within 1 ulp; Pressure within 2 ulp (FFT summation order).
 - RAD categories differ on a minority of elements: the baseline RAD accumulation is
   racy (lost updates, spec D5). Two BEFORE runs differ from each other by up to
   ~20× the tolerance on RAD, so the baseline RAD values are not a valid reference
