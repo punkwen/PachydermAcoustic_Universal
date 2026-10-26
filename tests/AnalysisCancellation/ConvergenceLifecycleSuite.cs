@@ -203,8 +203,12 @@ internal static class ConvergenceLifecycleSuite
 
         Harness.Assert(tracer.Failure is InvalidOperationException && tracer.Failure.Message == FailureMessage,
             $"injected failure not surfaced; Failure = {tracer.Failure}");
-        Harness.Assert(tracer.ThreadState() == System.Threading.ThreadState.Stopped,
-            "failed run never reached Stopped; polling callers would hang");
+        // A poller must not read a faulted run as a finished one: ThreadState() rethrows the
+        // stored failure, the same contract ImageSourceData already uses.
+        bool rethrown = false;
+        try { tracer.ThreadState(); }
+        catch (InvalidOperationException error) { rethrown = error.Message == FailureMessage; }
+        Harness.Assert(rethrown, "failed run reported Stopped instead of rethrowing its failure");
         Harness.Assert(feedback.Payloads.Count == 0, "a failed round must not run convergence checks");
 
         double settled = BankTotal(bank);

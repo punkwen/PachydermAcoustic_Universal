@@ -211,13 +211,15 @@ namespace Pachyderm_Acoustic
 
         ValueTask Prime;
 
+        private Exception failure;
+
         /// <summary>
         /// The first exception thrown by a convergence round's ray task, if any (spec D6).
-        /// The failing round is fully settled before the simulation stops, so once
-        /// ThreadState() reports Stopped no receiver writers remain and this holds the
-        /// failure that ended the run; null on normal or cancelled completion.
+        /// The failing round is fully settled before the simulation stops, and ThreadState()
+        /// rethrows it once, so a caller polling the state observes the failure instead of
+        /// treating the partial run as a finished one. Null on normal or cancelled completion.
         /// </summary>
-        public Exception Failure { get; private set; }
+        public Exception Failure { get { return Volatile.Read(ref failure); } }
 
         /// <summary>
         /// Inherited member. Divides the simulation into tasks, and begins.
@@ -225,6 +227,7 @@ namespace Pachyderm_Acoustic
         public override void Begin()
         {
             conclude = false;
+            failure = null;
             _st = DateTime.Now;
             Random Rnd = new Random((int)DateTime.Now.ToFileTimeUtc());
             _processorCt = System.Environment.ProcessorCount;
@@ -247,7 +250,16 @@ namespace Pachyderm_Acoustic
 
                 Task.Run(async () =>
                 {
-                    for (int i = 0; i < FixedRays.Count; i++) await FixedRays[i];
+                    // Settle every worker even if one faults, record the first failure for
+                    // ThreadState() to rethrow, and always conclude: a faulted run must not
+                    // report success, and must not leave a caller polling forever.
+                    Exception roundFailure = null;
+                    for (int i = 0; i < FixedRays.Count; i++)
+                    {
+                        try { await FixedRays[i]; }
+                        catch (Exception ex) { if (roundFailure == null) roundFailure = ex; }
+                    }
+                    if (roundFailure != null) failure = roundFailure;
                     conclude = true;
                     _ts = DateTime.Now - _st;
                 });
@@ -265,6 +277,12 @@ namespace Pachyderm_Acoustic
         public override System.Threading.ThreadState ThreadState()
         {
             if (!conclude) return System.Threading.ThreadState.Running;
+            // Same contract as ImageSourceData: once the workers have settled, a stored failure
+            // is rethrown to whoever polls the state instead of reporting a stopped run whose
+            // receivers were only partly written (spec D6). The failure is kept, not consumed,
+            // so the caller can still read Failure after observing the throw.
+            Exception error = Volatile.Read(ref failure);
+            if (error != null) System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(error).Throw();
             return System.Threading.ThreadState.Stopped;
         }
 
@@ -339,20 +357,20 @@ namespace Pachyderm_Acoustic
                 // Settle the entire round — including faulted tasks — before checking
                 // convergence, so a failure is never read as convergence and no unobserved
                 // task is left writing receivers (spec D6).
-                Exception failure = null;
+                Exception roundFailure = null;
                 foreach (ValueTask t in RoundRays)
                 {
                     try { await t; }
-                    catch (Exception ex) { if (failure == null) failure = ex; }
+                    catch (Exception ex) { if (roundFailure == null) roundFailure = ex; }
                 }
                 RoundRays = null;
 
-                if (failure != null)
+                if (roundFailure != null)
                 {
                     // Failure cleanup (spec D6): the round is fully settled; record the
                     // first failure for the caller, stop without checking convergence,
                     // and let no further rounds start.
-                    Failure = failure;
+                    failure = roundFailure;
                     break;
                 }
 
