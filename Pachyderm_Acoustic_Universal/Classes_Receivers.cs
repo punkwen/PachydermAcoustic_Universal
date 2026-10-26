@@ -1438,12 +1438,6 @@ namespace Pachyderm_Acoustic
                 {
                     SampleRate = SampleRate_in;
                     this.SampleCT = SampleCT;
-                    Energy = new double[bandCount][];
-
-                    for (int o = 0; o < Energy.Length; o++)
-                    {
-                        Energy[o] = new double[SampleCT];
-                    }
                     Dir_Rec_Pos = new double[3][][];
                     Dir_Rec_Neg = new double[3][][];
                     for (int i = 0; i < 3; i++)
@@ -1474,11 +1468,6 @@ namespace Pachyderm_Acoustic
                     SampleRate = SampleRate_in;
                     CO_Time = COTime_in / 1000;
                     SampleCT = (int)(CO_Time * SampleRate);
-                    Energy = new double[bandCount][];
-                    for (int o = 0; o < Energy.Length; o++)
-                    {
-                        Energy[o] = new double[(int)(SampleRate * CO_Time)];
-                    }
                     Dir_Rec_Pos = new double[3][][];
                     Dir_Rec_Neg = new double[3][][];
                     for (int i = 0; i < 3; i++)

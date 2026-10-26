@@ -8,5 +8,6 @@ RayTraceDeterminismSuite.Register();
 RadAccumulationSuite.Register();
 FilterContractSuite.Register();
 ConvergenceLifecycleSuite.Register();
+HistogramEnergySuite.Register();
 
 return await Harness.RunAll();
