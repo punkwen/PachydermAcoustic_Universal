@@ -26,6 +26,7 @@ namespace Pachyderm_Acoustic
     /// </summary>
     public abstract class Simulation_Type
     {
+        public CancellationToken Cancellation { get; set; } = CancellationToken.None;
         public abstract string Sim_Type();
         public abstract void Begin();
         public abstract string ProgressMsg();
