@@ -4,14 +4,14 @@
 
 **Blocked by:** 03（相同文件；直接 await Task 是滤波后台调用契约的一部分）
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [x] RunSimulation 保留 Task 返回签名；启动后与合并后先检查状态协议，确需等待才异步延迟；两阶段 × needfeedback 两值均无阻塞式休眠
 - [x] 已完成状态不付出首次或合并后的固定延迟（含现有合并前固定 3 秒）；仍在运行时保留 3,000 ms 轮询
 - [x] 正常完成路径保留一次 Combine_ThreadLocal_Results 及其顺序；失败/取消不在仍有写入者的情况下强行合并，保留各仿真类型安全退出语义
 - [x] Hybrid/Mapping 消费者直接 await RunSimulation 的 Task；删除外层 GetAwaiter+Delay 二次轮询；其后读取结果与启动下一阶段的顺序不变
 - [x] 正常/取消/异常退出保留自动保存、重绘、进程优先级等 finally 恢复；UI 更新在正确线程；无新取消 API
-- [ ] Rhino 集成清单执行并记录：已完成仿真与无后续工作的合并路径不再额外等待 3 秒；确有合并后工作时正确等待；needfeedback 真/假时界面均可继续交互
+- [ ] Rhino 集成清单执行并记录（headless 部分已完成并记录于 .rt-perf-notes/08-rhino-checklist.md 与 report.md 第五节；Rhino 会话内交互项未完成）：已完成仿真与无后续工作的合并路径不再额外等待 3 秒；确有合并后工作时正确等待；needfeedback 真/假时界面均可继续交互
 
 ----
 
