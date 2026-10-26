@@ -5,6 +5,7 @@ using RayTraceTests;
 // PoolInitSuite runs first so T1 exercises cold (first-ever) pool access.
 PoolInitSuite.Register();
 RayTraceDeterminismSuite.Register();
+RadAccumulationSuite.Register();
 FilterContractSuite.Register();
 
 return await Harness.RunAll();

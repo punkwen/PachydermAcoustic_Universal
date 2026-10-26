@@ -853,24 +853,9 @@ namespace Pachyderm_Acoustic
                     double energy = R.Intensity * Math.Pow(10, -.1 * Atten[R.Octave] * Raytime * C_Sound) * SizeMod * tsphere; // t
                     Recs.Add(Raytime, energy, -R.dx, -R.dy, -R.dz, Rho_C, R.Octave);
                     int sample = (int)(Raytime * SampleRate);
-                    if (sample < Reflection_Analysis_Data[0][0].Length)
-                    {
-                        if (R.IsSpecular)
-                        {
-                            if (R.WasScattered)
-                            {
-                                Reflection_Analysis_Data[2][R.Octave][sample] += energy;
-                            }
-                            else
-                            {
-                                Reflection_Analysis_Data[0][R.Octave][sample] += energy;
-                            }
-                        }
-                        else
-                        {
-                            Reflection_Analysis_Data[1][R.Octave][sample] += energy;
-                        }
-                    }
+                    int kindOctave = R.IsSpecular ? (R.WasScattered ? 2 : 0) : 1;
+                    if (sample >= 0 && sample < Reflection_Analysis_Data[kindOctave][R.Octave].Length)
+                        lock (Reflection_Analysis_Data[kindOctave][R.Octave]) Reflection_Analysis_Data[kindOctave][R.Octave][sample] += energy;
                 }
             }
 
