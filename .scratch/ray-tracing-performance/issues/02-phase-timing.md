@@ -12,3 +12,12 @@
 - [ ] 未启用阶段标记为未执行；不新增逐射线计数/日志热点
 - [ ] 保留现有公开计数字段含义；不修改功率谱、共享频带表或声学抽样规则（结果不变）
 - [ ] 产出一份修改前的分阶段基线记录（固定场景），供 09 号工单对照
+
+## Comments
+
+Implemented on branch `ticket/02` (Universal: 384db2d, Rhino: d8e4344).
+
+- `Simulation_Type._workClock` (additive Stopwatch) is restarted by `RCPachTools.RunSimulation` around Begin()..Combine_ThreadLocal_Results; Rhino-side `Source_Stage_Timing` prints one per-source summary per source via the existing `RhinoApp.WriteLine` channel (prepare receivers, direct/image/is-trace/ray-trace with construct-vs-work-vs-await-wait split, filter span, end-to-end wall; stages that did not run are reported as not run).
+- Hybrid and Mapping pre-loop scene construction/partitioning get an explicit batch-prep line; Mapping pre-loop map-mesh+receiver construction is attributed per source and labelled nested (do not add to batch total).
+- Headless BEFORE baseline (fixed scenario, 4 warm runs) + AFTER comparison: `.rt-perf-notes/02-baseline.md`; fixture `.rt-perf-notes/02-fixture-before.txt` (sha256 1f0e5fab...c70eb), reproduced by `dotnet run --project tests/PhaseTimingBaseline`. Acoustic fixture identical within spec tolerance => results unchanged.
+- Rhino-session numbers (UI wait, image source, IS-trace, Hybrid/Mapping batch prep in Rhino) remain incomplete: instrumentation prints them, but no Rhino run has been captured yet.
