@@ -4,6 +4,8 @@
     <TargetFrameworks>net8.0;net48</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- x64: matches libfftw3-3.dll; AnyCPU net48 exes run 32-bit and FFTW then fails to load (ticket 03). -->
+    <PlatformTarget>x64</PlatformTarget>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <!-- Suites exercise the FFTW-backed filter creation on file read; the bundled libfftw3-3.dll is x64-only,
          so the net48 flavor must not run as 32-bit-preferred. -->

@@ -12,3 +12,7 @@
 - [ ] T1 断言通过：首次并发访问 Initialize/Instance 与反复调用得到相同、完整实例；全部借用配对归还；若同一射线在归还前再次被出租，报告为独立正确性阻塞，不暗改租约算法
 - [ ] T2 断言通过：至少两个不同功率谱的声源依次计算，冷/暖池结果正确；先前结果不被下一声源覆盖；8/24 band 均通过
 - [ ] 通过连续多源及冷/暖运行验证；若回归暴露在用射线被再次出租，暂停相关合并并单列阻塞
+
+---
+
+**Implementation note (2026-10-26, branch `ticket/05`):** both pools now create themselves through a single `Lazy<T>` (`LazyThreadSafetyMode.ExecutionAndPublication`); `Initialize()` only forces materialization and never replaces an existing pool; the constructors no longer self-publish (`instance = this` removed), so no half-constructed instance is ever visible. Write-only `initialized` flags and the unused `insLock` were deleted; capacities (200,000 / 5,000), ring-rent and anonymous-release algorithms, and all borrow/generate/release signatures unchanged. Consumers verified compatible: `SplitRayTracer` ctor and `IS_Trace` (their `Initialize()` calls are now idempotent no-ops when a pool exists), all `BroadRayPool.Instance.new_*` source/direction overloads, and `GeometryPool` — its type-init capture now always yields the live instance because the instance is never replaced. Assertions live in `tests/AnalysisCancellation/PoolInitSuite.cs` (T1 lifecycle + lease canary, T2 successive sources 8/24 bands cold/warm); red was confirmed against the pre-fix code (concurrent first access produced multiple instances). No in-use-ray re-rental observed at existing concurrency (8 workers × 250 pull/release cycles) — lease algorithm untouched as required.

@@ -24,7 +24,6 @@ using MathNet.Numerics;
 using Pachyderm_Acoustic.Pach_Graphics;
 using Pachyderm_Acoustic.Utilities;
 using System.CodeDom;
-using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using Eto.Forms;
 
@@ -571,43 +570,51 @@ namespace Pachyderm_Acoustic
 
             private bool CreatingFilter = false;
 
-            public async virtual void Create_Filter(IProgressFeedback VB = null)
+            public virtual void Create_Filter(IProgressFeedback VB = null)
             {
                 CreatingFilter = true;
-                //if (VB != null) VB.Report((int)(100 * (1f - ((float)CDE.CurrentCount / (float)IR.Length))));
-                //if (VB != null) VB.change_title(string.Format("Filter Progress: Creating Positive {0}.", new string[3] { "X", "Y", "Z" }[dir]));
-                //if (VB != null) VB.change_title(string.Format("Filter Progress: Creating Negative {0}.", new string[3] { "X", "Y", "Z" }[dir]));
-
-                //VB.change_title(string.Format("Filter Progress: Creating Positive {0}.", new string[3] { "X", "Y", "Z" }[dir]));
-                //VB.change_title(string.Format("Filter Progress: Creating Negative {0}.", new string[3] { "X", "Y", "Z" }[dir]));
-
-                Task[] t = new Task[Rec_List.Length];
-
-                for (int rec = 0; rec < Rec_List.Length; rec++)
+                try
                 {
-                    if (VB != null)
+                    for (int rec = 0; rec < Rec_List.Length; rec++)
                     {
-                        VB.change_title(string.Format("Creating Pressure for receiver {0}", rec));
-                        VB.Report((int)(((double)(rec + 1) * 100) / ((double)Rec_List.Length)));
+                        if (VB != null)
+                        {
+                            VB.change_title(string.Format("Creating Pressure for receiver {0}", rec));
+                            VB.Report((int)(((double)(rec + 1) * 100) / ((double)Rec_List.Length)));
+                        }
+                        Rec_List[rec].Create_Filter();
                     }
-                    //t[rec] = Task.Run(() => { Rec_List[rec].Create_Filter(); });
-                    //while (t[rec].Status != TaskStatus.RanToCompletion) System.Threading.Thread.Sleep(300);//await Task.Delay(500);
-                    Rec_List[rec].Create_Filter();
                 }
-                //await Task.WhenAll(t);
-                CreatingFilter = false;
+                finally
+                {
+                    CreatingFilter = false;
+                }
             }
 
             public double[] Create_Filter(double[] SWL, int Rec_ID, int dim, IProgressFeedback VB = null)
             {
                 CreatingFilter = true;
-                return Rec_List[Rec_ID].Create_Filter(SWL, dim);
+                try
+                {
+                    return Rec_List[Rec_ID].Create_Filter(SWL, dim);
+                }
+                finally
+                {
+                    CreatingFilter = false;
+                }
             }
 
             public double[][] Create_Filter(double[] SWL, int Rec_ID, IProgressFeedback VB = null)
             {
                 CreatingFilter = true;
-                return Rec_List[Rec_ID].Create_Filter(SWL);
+                try
+                {
+                    return Rec_List[Rec_ID].Create_Filter(SWL);
+                }
+                finally
+                {
+                    CreatingFilter = false;
+                }
             }
 
             public double[][] Filter_3Axis(int rec_id)
