@@ -93,7 +93,7 @@ internal static class PoolFixtures
 {
     public static BroadRayPool Broad => BroadRayPool.Instance;
     public static OctaveRayPool Octave => OctaveRayPool.Instance;
-    /// <summary>Captured at GeometryPool's static initialization — may legitimately differ from <see cref="Broad"/> after a re-initialize.</summary>
+    /// <summary>Captured at GeometryPool's static initialization — always the live instance since ticket 05 made Initialize() idempotent.</summary>
     public static BroadRayPool SharedBroad => GeometryPool.MainPool;
     public static OctaveRayPool SharedOctave => GeometryPool.OctPool;
     public static void Reinitialize()
