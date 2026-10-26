@@ -83,7 +83,7 @@ internal static class ConvergenceLifecycleSuite
                 Harness.Assert(feedback.Totals[r] > feedback.Totals[r - 1],
                     $"{mode}: round {r + 1} did not add to the bank accumulated by earlier rounds");
             double finalTotal = BankTotal(bank);
-            Harness.Assert(finalTotal > feedback.Totals[^1], $"{mode}: final round's contributions not counted into the bank");
+            Harness.Assert(finalTotal > feedback.Totals[feedback.Totals.Count - 1], $"{mode}: final round's contributions not counted into the bank");
         }
 
         if (checkPayload)
@@ -120,7 +120,7 @@ internal static class ConvergenceLifecycleSuite
         // Measured after the fix: flat within ~2 KB from round 8 on (bounded IR queue in
         // the checks plus jitter). The pre-fix code retained every historical round's tasks
         // (~3 KB/round → ~50 KB by round 25 on top of this), so this limit discriminates.
-        long lateGrowth = feedback.Heap[^1] - feedback.Heap[7];
+        long lateGrowth = feedback.Heap[feedback.Heap.Count - 1] - feedback.Heap[7];
         Harness.Assert(lateGrowth < RetentionGrowthLimitBytes,
             $"retained work grew by {lateGrowth} bytes between round 8 and round {RetentionRounds}; round task sets must not accumulate");
     }
