@@ -29,7 +29,8 @@ foreach (bool feedback in new[] { true, false })
     sw.Stop();
     Check(sw.ElapsedMilliseconds < 1000, $"completed sim pays no fixed delay, either phase (needfeedback={feedback}) [{sw.ElapsedMilliseconds} ms]");
     Check(ReferenceEquals(result, sim) && sim.CombineCalls == 1, $"completed sim returns after exactly one combine (needfeedback={feedback})");
-    Check(Rhino.RhinoApp.PromptCalls == 0, $"no polling prompt churn when already stopped (needfeedback={feedback})");
+    // One prompt announces the start; a stopped simulation must add no polling prompts.
+    Check(Rhino.RhinoApp.PromptCalls == 1, $"no polling prompt churn when already stopped (needfeedback={feedback})");
     Check(Rhino.ApplicationSettings.FileSettings.AutoSaveEnabled, $"autosave restored after success (needfeedback={feedback})");
 }
 
@@ -43,7 +44,7 @@ foreach (bool feedback in new[] { true, false })
     sw.Stop();
     Check(sw.ElapsedMilliseconds >= 2900 && sw.ElapsedMilliseconds <= 9000, $"running first-phase work polls at 3,000 ms [{sw.ElapsedMilliseconds} ms]");
     Check(sim.CombineCalls == 1, "running first-phase work still combines exactly once");
-    Check(Rhino.RhinoApp.PromptCalls == 1, "progress prompt still updates once per poll while running");
+    Check(Rhino.RhinoApp.PromptCalls == 2, "progress prompt still updates once per poll while running");
     Check(Rhino.ApplicationSettings.FileSettings.AutoSaveEnabled, "autosave restored after polling wait");
 }
 
