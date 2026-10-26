@@ -7,5 +7,6 @@ PoolInitSuite.Register();
 RayTraceDeterminismSuite.Register();
 RadAccumulationSuite.Register();
 FilterContractSuite.Register();
+HistogramEnergySuite.Register();
 
 return await Harness.RunAll();
