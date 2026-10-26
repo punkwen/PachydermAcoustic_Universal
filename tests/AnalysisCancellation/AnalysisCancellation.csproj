@@ -17,4 +17,11 @@
          project reference only: no Rhino dependency, no test packages, no private reflection. -->
     <ProjectReference Include="..\..\Pachyderm_Acoustic_Universal\Pachyderm_Acoustic_Universal.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- T6 fixed-count regression (ticket 09): scenario + comparator compiled in from the
+         standalone runner project, so the harness suite and tests/T6Baseline (whose copy in
+         the baseline worktree produces the BEFORE fixture) run identical code. -->
+    <Compile Include="..\T6Baseline\T6Scenario.cs" Link="T6Scenario.cs" />
+    <Compile Include="..\T6Baseline\T6Shared.cs" Link="T6Shared.cs" />
+  </ItemGroup>
 </Project>

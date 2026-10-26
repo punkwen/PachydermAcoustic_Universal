@@ -10,4 +10,9 @@ FilterContractSuite.Register();
 ConvergenceLifecycleSuite.Register();
 HistogramEnergySuite.Register();
 
+// T6 fixed-count BEFORE/AFTER regression (ticket 09): dumps the fixture twice and
+// compares; also compares against the BEFORE fixture when T6_BEFORE_FIXTURE is set
+// (see tests/T6Baseline/README.md).
+T6RegressionSuite.Register();
+
 return await Harness.RunAll();
